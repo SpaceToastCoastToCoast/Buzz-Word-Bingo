@@ -84,3 +84,5 @@ var server = app.listen(PORT, () => {
   var port = server.address().port;
   console.log('server started on', port);
 });
+
+module.exports = server;
