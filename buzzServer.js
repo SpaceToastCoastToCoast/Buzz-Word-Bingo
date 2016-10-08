@@ -3,6 +3,7 @@ const PORT = 3000;
 const bodyParser = require('body-parser');
 const app = express();
 let buzzWords = [];
+let score = 0;
 
 function findBuzzwordIndex(buzz) {
   let [bwObject] = buzzWords.filter((word, index, array) => {
@@ -26,18 +27,33 @@ app.get('/buzzwords', (req, res) => {
 
 app.route('/buzzword')
 .post((req, res) => {
-  req.body.heard = false;
-  buzzWords.push(req.body);
-  res.json({
-    success : true
-  });
+  let buzzIndex = findBuzzwordIndex(req.body.buzzWord);
+  if(buzzIndex < 0) {
+    req.body.heard = false;
+    buzzWords.push(req.body);
+    res.json({
+      success : true
+    });
+  } else {
+    res.json({
+      success : false
+    });
+  }
 })
 .put((req, res) => {
-
-  res.json({
-    success: true,
-    newScore: score
-  });
+  let buzzIndex = findBuzzwordIndex(req.body.buzzWord);
+  if(buzzIndex >= 0) {
+    buzzWords[buzzIndex].heard = true;
+    score += parseInt(buzzWords[buzzIndex].points);
+    res.json({
+      success: true,
+      newScore : score
+    });
+  } else {
+    res.json({
+      success: false
+    });
+  }
 })
 .delete((req, res) => {
   let buzzIndex = findBuzzwordIndex(req.body.buzzWord);
@@ -54,7 +70,13 @@ app.route('/buzzword')
 });
 
 app.post('/reset', (req, res) => {
-
+  if(req.body.reset) {
+    buzzWords = [];
+    score = 0;
+    res.json({
+      success: true
+    });
+  }
 });
 
 var server = app.listen(PORT, () => {
